@@ -83,27 +83,27 @@ function DisplayBuilder:build(): Display
 end
 
 function DisplayBuilder:sortKeys(sortKeys: boolean): DisplayBuilder
-	return constructFrom(self, function(mutStruct)
+	return newDisplayBuilder(constructFrom(self, function(mutStruct)
 		mutStruct.sortKeys = sortKeys
-	end) :: DisplayBuilder
+	end)) :: DisplayBuilder
 end
 
 function DisplayBuilder:indentWith(text: string): DisplayBuilder
-	return constructFrom(self, function(mutStruct)
+	return newDisplayBuilder(constructFrom(self, function(mutStruct)
 		mutStruct.indentWith = text
-	end) :: DisplayBuilder
+	end)) :: DisplayBuilder
 end
 
 function DisplayBuilder:callback(callback: Callback): DisplayBuilder
-	return constructFrom(self, function(mutStruct)
+	return newDisplayBuilder(constructFrom(self, function(mutStruct)
 		mutStruct.callback = callback
-	end) :: DisplayBuilder
+	end)) :: DisplayBuilder
 end
 
 function DisplayBuilder:override(callback: OverrideCallback): DisplayBuilder
-	return constructFrom(self, function(mutStruct)
+	return newDisplayBuilder(constructFrom(self, function(mutStruct)
 		mutStruct.override = callback
-	end) :: DisplayBuilder
+	end)) :: DisplayBuilder
 end
 
 function DisplayBuilder:display(value, baseIndent, logs): string
