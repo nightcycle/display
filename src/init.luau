@@ -28,10 +28,10 @@ type DisplayImpl = {
 export type Display = DisplayStruct & DisplayImpl
 
 type DisplayBuilderImpl = {
-	sortKeys: (self: DisplayBuilder, sortKeys: boolean) -> DisplayBuilder,
-	indentWith: (self: DisplayBuilder, character: string) -> DisplayBuilder,
-	callback: (self: DisplayBuilder, callback: Callback) -> DisplayBuilder,
-	override: (self: DisplayBuilder, callback: OverrideCallback) -> DisplayBuilder,
+	setSortKeys: (self: DisplayBuilder, sortKeys: boolean) -> DisplayBuilder,
+	setIndentWith: (self: DisplayBuilder, character: string) -> DisplayBuilder,
+	setCallback: (self: DisplayBuilder, callback: Callback) -> DisplayBuilder,
+	setOverride: (self: DisplayBuilder, callback: OverrideCallback) -> DisplayBuilder,
 	build: (self: DisplayBuilder) -> Display,
 	display: (self: DisplayBuilder, value: unknown?, baseIndent: number?, log: { [any]: true? }?) -> string,
 }
@@ -82,25 +82,25 @@ function DisplayBuilder:build(): Display
 	return newDisplay(self :: DisplayStruct)
 end
 
-function DisplayBuilder:sortKeys(sortKeys: boolean): DisplayBuilder
+function DisplayBuilder:setSortKeys(sortKeys: boolean): DisplayBuilder
 	return constructFrom(self, function(mutStruct)
 		mutStruct.sortKeys = sortKeys
 	end) :: DisplayBuilder
 end
 
-function DisplayBuilder:indentWith(text: string): DisplayBuilder
+function DisplayBuilder:setIndentWith(text: string): DisplayBuilder
 	return constructFrom(self, function(mutStruct)
 		mutStruct.indentWith = text
 	end) :: DisplayBuilder
 end
 
-function DisplayBuilder:callback(callback: Callback): DisplayBuilder
+function DisplayBuilder:setCallback(callback: Callback): DisplayBuilder
 	return constructFrom(self, function(mutStruct)
 		mutStruct.callback = callback
 	end) :: DisplayBuilder
 end
 
-function DisplayBuilder:override(callback: OverrideCallback): DisplayBuilder
+function DisplayBuilder:setOverride(callback: OverrideCallback): DisplayBuilder
 	return constructFrom(self, function(mutStruct)
 		mutStruct.override = callback
 	end) :: DisplayBuilder
