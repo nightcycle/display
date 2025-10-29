@@ -1,7 +1,8 @@
 --!strict
 -- Services
 -- Packages
-local Option = require(script.Parent:WaitForChild("option")) -- Modules
+local Option = require("@pkg/@nightcycle/option")
+
 -- Types
 
 type Option<V> = Option.Option<V>
