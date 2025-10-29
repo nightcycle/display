@@ -1,12 +1,13 @@
 --!strict
 -- Services
 -- Packages
-local Option = require("@pkg/@nightcycle/option")
--- Modules
+local Option = require(script.Parent:WaitForChild("option")) -- Modules
 -- Types
+
 type Option<V> = Option.Option<V>
 export type DisplayConfig = {
 	sortKeys: boolean,
+	useMetatable: boolean,
 	indentWith: string,
 }
 type OverrideCallback = (
@@ -30,12 +31,13 @@ export type Display = DisplayStruct & DisplayImpl
 type DisplayBuilderImpl = {
 	setSortKeys: (self: DisplayBuilder, sortKeys: boolean) -> DisplayBuilder,
 	setIndentWith: (self: DisplayBuilder, character: string) -> DisplayBuilder,
+	setUseMetatable: (self: DisplayBuilder, useMetatable: boolean) -> DisplayBuilder,
 	setCallback: (self: DisplayBuilder, callback: Callback) -> DisplayBuilder,
 	setOverride: (self: DisplayBuilder, callback: OverrideCallback) -> DisplayBuilder,
 	build: (self: DisplayBuilder) -> Display,
 	display: (self: DisplayBuilder, value: unknown?, baseIndent: number?, log: { [any]: true? }?) -> string,
 }
-export type DisplayBuilder = DisplayStruct & DisplayBuilderImpl
+export type DisplayBuilder = DisplayBuilderImpl
 -- Constants
 -- Variables
 -- References
@@ -54,7 +56,7 @@ local DisplayBuilder = {} :: DisplayBuilderImpl
 DisplayBuilder["__index"] = DisplayBuilder
 
 function newDisplayBuilder(struct: DisplayStruct): DisplayBuilder
-	local self = table.clone(struct) :: DisplayBuilder
+	local self = table.clone(struct) :: any
 	setmetatable(self, DisplayBuilder)
 	table.freeze(self)
 	return self
@@ -88,6 +90,11 @@ function DisplayBuilder:setSortKeys(sortKeys: boolean): DisplayBuilder
 	end)) :: DisplayBuilder
 end
 
+function DisplayBuilder:setUseMetatable(useMetatable): DisplayBuilder
+	return newDisplayBuilder(constructFrom(self, function(mutStruct)
+		mutStruct.useMetatable = useMetatable
+	end)) :: DisplayBuilder
+end
 function DisplayBuilder:setIndentWith(text: string): DisplayBuilder
 	return newDisplayBuilder(constructFrom(self, function(mutStruct)
 		mutStruct.indentWith = text
@@ -114,6 +121,7 @@ function newJsonDisplayBuilder(): DisplayBuilder
 	return newDisplayBuilder({
 		sortKeys = false,
 		indentWith = "",
+		useMetatable = false,
 		override = function(
 			value: unknown?,
 			baseIndent: number,
@@ -128,6 +136,10 @@ function newJsonDisplayBuilder(): DisplayBuilder
 			display: Display,
 			log: { [any]: true? }
 		): string
+			local ov = display.override(value, baseIndent, display, log)
+			if ov ~= nil then
+				return ov
+			end
 			if type(value) == "string" then
 				return '"' .. value:gsub('"', '\\"') .. '"'
 			elseif type(value) == "number" then
@@ -148,7 +160,7 @@ function newJsonDisplayBuilder(): DisplayBuilder
 				pcall(function()
 					meta = getmetatable(value :: any)
 				end)
-				if meta and rawget(meta, "__tostring") ~= nil then
+				if display.useMetatable and meta and rawget(meta, "__tostring") ~= nil then
 					local str: string?
 					local tostringSuccess, _ = pcall(function()
 						str = tostring(value)
